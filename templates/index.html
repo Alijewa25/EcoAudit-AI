@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESG-Audit AI | Environmental Truth-Machine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="hero">
+            <h1>ESG-Audit <span class="ai-badge">AI</span></h1>
+            <p>Intelligence for Sustainable Global Trade & CBAM Compliance</p>
+        </header>
+
+        <section class="card animate-in" id="uploadSection">
+            <div class="card-header">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h2>Deep Analysis</h2>
+            </div>
+            <p>Upload your energy bills, fuel logs, or invoices to detect carbon footprint and greenwashing.</p>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="file-drop-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span class="file-msg">Click or drag your PDF here</span>
+                    <input class="file-input" type="file" name="file" accept="application/pdf" required id="fileInput">
+                </div>
+                <button type="submit" id="submitBtn">
+                    <span id="btnText">Verify & Audit</span>
+                    <div id="loader" class="loader hidden"></div>
+                </button>
+            </form>
+        </section>
+
+        <div id="errorBox" class="hidden" style="color:#b00; margin:1rem 0; font-weight:600;"></div>
+
+        <section id="resultCard" class="card result-card hidden">
+            <div class="result-header">
+                <div id="truthBadge" class="badge badge-success">
+                    <i class="fas fa-check-circle"></i> Data Verified
+                </div>
+                <h2>Environmental Audit Report</h2>
+            </div>
+            <hr>
+            <div id="analysisContent" class="analysis-content"></div>
+            
+            <div class="action-buttons">
+                <button id="newAuditBtn" class="secondary-btn">
+                    <i class="fas fa-redo"></i> New Audit
+                </button>
+                <button onclick="window.print()" class="print-btn">
+                    <i class="fas fa-print"></i> Save as PDF
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loader = document.getElementById('loader');
+        const resultCard = document.getElementById('resultCard');
+        const uploadSection = document.getElementById('uploadSection');
+        const analysisContent = document.getElementById('analysisContent');
+        const truthBadge = document.getElementById('truthBadge');
+        const errorBox = document.getElementById('errorBox');
+
+        // Fayl seçiləndə adını göstər
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            const fileName = file ? file.name : 'No file chosen';
+            document.querySelector('.file-msg').innerText = fileName;
+        });
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            errorBox.classList.add('hidden');
+            errorBox.textContent = '';
+            
+            // Loading State
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            const formData = new FormData(uploadForm);
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // DeepSeek-dən gələn cavabı render et
+                    analysisContent.innerHTML = marked.parse(data.analysis);
+                    
+                    // Greenwashing Alert Check
+                    if (data.analysis.toUpperCase().includes('GREENWASHING')) {
+                        truthBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Potential Greenwashing Detected';
+                        truthBadge.className = 'badge badge-danger';
+                    } else {
+                        truthBadge.innerHTML = '<i class="fas fa-check-circle"></i> Data Verified';
+                        truthBadge.className = 'badge badge-success';
+                    }
+
+                    uploadSection.classList.add('hidden');
+                    resultCard.classList.remove('hidden');
+                } else {
+                    const message = data.error || 'Unknown error';
+                    errorBox.textContent = 'Audit failed: ' + message;
+                    errorBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorBox.textContent = 'Connection error. Is the server running?';
+                errorBox.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('newAuditBtn').addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>

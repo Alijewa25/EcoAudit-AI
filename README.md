@@ -16,11 +16,11 @@ In an era where the **EU Carbon Border Adjustment Mechanism (CBAM)** and **CSRD*
 - **Green Infrastructure Analytics:** Specialized modules for validating smart-building efficiency and sustainable asset performance.
 
 ## 🛠 Tech Architecture
-The system is built on a high-performance stack optimized for data integrity and analytical depth:
+The system is built on a lightweight stack optimized for PDF parsing and AI-driven audit summaries:
 - **Core Engine:** Python 3.10+
-- **Intelligence:** OpenAI GPT-4o Integration
-- **Framework:** Streamlit (Analytical Dashboard)
-- **Data Processing:** Advanced OCR & Document Parsing Pipelines
+- **Intelligence:** OpenAI / Google Gemini support
+- **Framework:** Flask web application
+- **Data Processing:** PDF text extraction via PyMuPDF
 
 ---
 
